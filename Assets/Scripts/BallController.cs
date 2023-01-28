@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class BallController : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class BallController : MonoBehaviour
     private Rigidbody rb;
     public TextMeshProUGUI countText;
     public GameObject winTextObject;
+    private string actualScene;
     //public GameObject player;
 
     private float movementX;
@@ -42,10 +44,31 @@ public class BallController : MonoBehaviour
     void setCountText()
     {
         countText.text = "Count: " + count.ToString();
-        if (count >= 3)
-        {
+        actualScene = Application.loadedLevelName;
+        
+        Debug.Log("escena actual: "+actualScene);
+        if (!GameObject.FindGameObjectWithTag("PickUp"))
+        {   
+            if (actualScene.Equals("level1"))
+            {
+                SceneManager.LoadScene(1);
+            }
+            else if (actualScene.Equals("level2"))
+            {
+                SceneManager.LoadScene(2);
+            }
+            else if (actualScene.Equals("level3"))
+            {
+                SceneManager.LoadScene(3);
+            }
+            else if (actualScene.Equals("level4"))
+            {
+                winTextObject.SetActive(true);
+            }
+
             // Set the text value of your 'winText'
-            winTextObject.SetActive(true);
+
+
         }
     }
 
@@ -58,18 +81,6 @@ public class BallController : MonoBehaviour
         movementCameraY = lookVector.y;
     }
    */
-
-    private void changeGravity(InputValue inputValue)
-    {
-        if (inputValue.Equals("V"))
-        {
-            Physics.gravity = new Vector3(0, 9.8f, 0);
-        }
-        else
-        {
-            Physics.gravity = new Vector3(0, -9.8f, 0);
-        }
-    }
     private void FixedUpdate()
     {
         Vector3 movement = new Vector3(movementX, 0.0f, movementY);
@@ -77,6 +88,12 @@ public class BallController : MonoBehaviour
 
         rb.AddForce(movement * speed);
         //transform.Rotate(cameraMovement);
+
+        if (Input.GetKeyDown("space"))
+        {
+            Vector3 jump = new Vector3(0.0f, 200.0f, 0.0f);
+            GetComponent<Rigidbody>().AddForce(jump);
+        }
 
     }
 
@@ -87,6 +104,12 @@ public class BallController : MonoBehaviour
             other.gameObject.SetActive(false);
             count += 1;
             setCountText();
+        }
+
+        if (other.gameObject.CompareTag("Gravity"))
+        {
+            other.gameObject.SetActive(false);
+            Physics.gravity = new Vector3(0, 9.8f, 0);
         }
     }
 
